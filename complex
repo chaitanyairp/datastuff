@@ -1,1 +1,59 @@
 https://www.projectpro.io/recipes/work-with-complex-nested-json-files-using-spark-sql
+
+
+from pyspark import SparkConf
+from pyspark.sql import SparkSession
+
+from pyspark.sql.types import StructType, StructField, StringType, ArrayType, MapType, IntegerType, DoubleType, TimestampType
+from pyspark.sql import functions as F
+
+spark_conf = SparkConf()
+spark_conf.set("spark.app.name", "Reader API")
+spark_conf.set("spark.master", "local[*]")
+
+spark = SparkSession\
+    .builder \
+    .config(conf = spark_conf)\
+    .getOrCreate()
+
+schema = StructType([
+    StructField("dc_id", StringType()),
+    StructField("source", MapType(
+        StringType(),
+        StructType([
+            StructField("id", StringType()),
+            StructField("ip", StringType()),
+            StructField("description", StringType()),
+            StructField("temp", IntegerType()),
+            StructField("c02_level", IntegerType()),
+            StructField("geo", StructType([
+                StructField("lat", DoubleType()),
+                StructField("long", DoubleType())
+            ]))
+        ])
+    ))
+])
+
+df = spark.read\
+    .format("json")\
+    .option("multiline", True)\
+    .schema(schema)\
+    .option("path", "C:/Users/chait/OneDrive/Desktop/datasets/Prac/complex.json")\
+    .load()
+
+expDf = df.select("dc_id", F.explode("source"))
+
+expDf.show(truncate=False)
+
+expDf.select(
+    F.col("dc_id").alias("dc_id"),
+    F.col("key").alias("device_type"),
+    F.col("value").getItem("id").alias("reading_id"),
+    F.col("value").getItem("ip").alias("device_ip"),
+    F.col("value").getItem("c02_level").alias("co2")
+).show()
+
+
+
+
+
