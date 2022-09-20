@@ -1,4 +1,4 @@
 Spark:
 
 Maptype json: https://www.projectpro.io/recipes/work-with-complex-nested-json-files-using-spark-sql
-Handle bad records: https://blog.knoldus.com/apache-spark-handle-corrupt-bad-records/
+Handle bad records: https://www.kimanimbugua.com/post/handling-bad-data-part-4-bad-records-path/
